@@ -27,19 +27,23 @@ from the center.
 
 In other words the grid follows this pattern:
 
+```
     18   7   8
   17   6   1   9
 16   5   0   2   10
   15   4   3   11
     14   13  12
+```
 
 For example, for the input sequence "ABCDEFGHIJKLMNOPQRS" the grid would look like this:
 
+```
     S   H   I
   R   G   B   J
 Q   F   A   C   K
   P   E   D   L
     O   N   M
+```
 
 Perhaps there is some mathematical formula to determine which indices are adjacent to others, but if 
 there is, I'm not smart enough to figure it out. That just leaves trying to represent this grid in
@@ -58,11 +62,13 @@ array and define a set of rules about which (x, y) coordinates are "adjacent" to
 
 For example, let's take the above grid and rotate it a bit:
 
+```
 Q   R   S
 P   F   G   H
 O   E   A   B   I
     N   D   C   J
         M   L   K
+```
 
 (This might look slightly rotated from what you expect, but I promise the solution works out the same.)
 
@@ -73,12 +79,6 @@ easier to view it like this.
 Now we have to determine which letters are adjacent to each other. Looking back at the grid, we can take for
 example the letter A and see that it's neighbors are: B, C, D, E, F, G. In our rotated 2d array we can see that
 this corresponds to the entries that are immediately up, down, left, and right, as well as down-right and up-left.
-
-Q   R   S
-P   **F**   **G**   H
-O   **E**   A   **B**   I
-    N   **D**   **C**   J
-        M   L   K
 
 As it turns out, this is true for any tile in the grid - it's neighbors will always be at the coordinates represented
 by these offsets. In (x, y) terms these are represented by:
