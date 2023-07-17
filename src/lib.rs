@@ -6,8 +6,7 @@ use std::fmt;
 
 /* ===== Global Data ===== */
 
-const SIZE: usize = 5;
-type Grid = [[char; SIZE]; SIZE];
+pub type Grid = Vec<Vec<char>>;
 
 
 /* ===== Structs ===== */
@@ -30,7 +29,7 @@ impl fmt::Debug for Coordinates {
 /* ===== Functions ===== */
 
 /* Find all valid neighbors of a given tile. */
-pub fn find_neighbors(grid: Grid, coords: Coordinates) -> Vec<Coordinates> {
+pub fn find_neighbors(grid: &Grid, coords: Coordinates) -> Vec<Coordinates> {
     let mut neighbors = Vec::new();
     let width = grid.len();
 
@@ -69,7 +68,7 @@ pub fn find_neighbors(grid: Grid, coords: Coordinates) -> Vec<Coordinates> {
 }
 
 /* Found the list of coordinates that correspond to the given sequence of characters. */
-pub fn find_route(grid: Grid, characters: &[char], mut start: Coordinates) ->
+pub fn find_route(grid: &Grid, characters: &[char], mut start: Coordinates) ->
     Result<Vec<Coordinates>, &'static str>
 {
     // First character must match starting point
@@ -103,7 +102,7 @@ pub fn find_route(grid: Grid, characters: &[char], mut start: Coordinates) ->
 }
 
 /* Find the tile in the grid that corresponds to the given letter. */
-pub fn find_tile(grid: Grid, start_char: char) -> Option<Coordinates> {
+pub fn find_tile(grid: &Grid, start_char: char) -> Option<Coordinates> {
     for x in 0..grid.len() {
         for y in 0..grid.len() {
             if start_char == grid[x][y] {
@@ -122,12 +121,46 @@ fn move_left(c: &mut Coordinates) { c.x -= 1; }
 fn move_up_left(c: &mut Coordinates) { c.x -= 1; c.y -= 1; }
 fn move_up(c: &mut Coordinates) { c.y -= 1; }
 
+/* Find the inverse Fibonacci (kind of). */
+fn inv_fibish(mut f_n: usize) -> usize {
+    let mut n = 0;
+    while f_n > n { f_n -= n; n += 1 }
+    n
+}
+
+/* Given the length of the input string, return the number of layers required.
+ * For example:
+ * 1 => 1 layer
+ * 2-7 => 2 layers
+ * 8-19 => 3 layers, etc.
+ */
+fn layers_n(i: usize) -> usize {
+    if i < 2 { 1 }
+    else {
+        inv_fibish(((i - 2) / 6) + 1) + 1
+    }
+}
+
+/* Given the length of the input string, returns the required width of the grid. */
+fn grid_width(i: usize) -> usize {
+    if i < 1 { 1 }
+    else {
+        ((layers_n(i)) * 2) - 1
+    }
+}
+
 /* Fill out the grid given the sequence of characters. */
-pub fn construct_grid(grid: &mut Grid, letters: &[char]) -> Result<usize, &'static str> {
+pub fn construct_grid(letters: &[char]) -> Result<Grid, &'static str> {
+
+    // Find width of grid
+    let width: usize = grid_width(letters.len());
+    let mut grid: Grid = vec![vec!['\0'; width]; width];
+
+    println!("Width: {}", width);
 
     // Find the center
     let mut start = {
-        let center = grid.len() / 2;
+        let center = width / 2;
         Coordinates{x: center, y: center}
     };
 
@@ -192,5 +225,5 @@ pub fn construct_grid(grid: &mut Grid, letters: &[char]) -> Result<usize, &'stat
         layer += 1;
     }
 
-    Ok(letters.len())
+    Ok(grid)
 }
