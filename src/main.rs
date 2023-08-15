@@ -1,4 +1,8 @@
-/* ===== main.rs ===== */
+//  ============================================================
+//  Filename:   main.rs
+//  Author:     Adrian Padin (padin.adrian@gmail.com)
+//  Date:       August 15, 2023
+//  ============================================================
 
 /* ===== Includes ===== */
 use hex_grid::{construct_grid, find_route, find_tile, print_grid, Grid};

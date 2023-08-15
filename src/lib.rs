@@ -1,15 +1,22 @@
-/* ===== lib.rs ===== */
+//  ============================================================
+//  Filename:   lib.rs
+//  Author:     Adrian Padin (padin.adrian@gmail.com)
+//  Date:       August 15, 2023
+//  ============================================================
 
-/* ===== Includes ===== */
+//! Solution to Hex Grid challenge problem.
+
+/* ========== Includes ========== */
 use std::fmt;
 
-/* ===== Global Data ===== */
+/* ========== Types ========== */
 
+/// 2D grid of letters
 pub type Grid = Vec<Vec<char>>;
 
-/* ===== Structs ===== */
+/* ========== Structs ========== */
 
-/// 2D Coordinates
+/// 2D coordinates
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct Coordinates {
     pub x: usize,
@@ -23,7 +30,7 @@ impl fmt::Debug for Coordinates {
     }
 }
 
-/* ===== Functions ===== */
+/* ========== Functions ========== */
 
 /// Find all valid neighbors of a given tile.
 pub fn find_neighbors(grid: &Grid, coords: Coordinates) -> Vec<Coordinates> {
@@ -164,24 +171,29 @@ fn inv_fibish(mut f_n: usize) -> usize {
 /// * 8-19 => 3 layers, etc.
 ///
 fn layers_n(i: usize) -> usize {
-    if i < 2 {
-        1
-    } else {
-        inv_fibish(((i - 2) / 6) + 1) + 1
+    match i {
+        0 => 0,
+        1 => 1,
+        _ => inv_fibish(((i - 2) / 6) + 1) + 1,
     }
 }
 
 /// Given the length of the input string, returns the required width of the grid.
 fn grid_width(i: usize) -> usize {
-    if i < 1 {
-        1
-    } else {
-        ((layers_n(i)) * 2) - 1
+    match i {
+        0 => 0,
+        1 => 1,
+        _ => ((layers_n(i)) * 2) - 1,
     }
 }
 
 /// Fill out the grid given the sequence of characters.
 pub fn construct_grid(letters: &[char]) -> Result<Grid, &'static str> {
+    // Error checking
+    if letters.len() < 1 {
+        return Err("Input letters are empty. Requires at least 1 letter to work.");
+    }
+
     // Find width of grid
     let width: usize = grid_width(letters.len());
     let mut grid: Grid = vec![vec!['\0'; width]; width];
@@ -294,5 +306,95 @@ pub fn print_grid(grid: &Grid) {
             }
         }
         println!("");
+    }
+}
+
+/* ========== Tests ========== */
+
+#[cfg(test)]
+pub mod tests {
+    use super::*;
+
+    /// Tests for [grid_width]
+    ///
+    #[test]
+    fn grid_width_test() {
+        assert_eq!(grid_width(0), 0);
+        assert_eq!(grid_width(1), 1);
+        for n in 2..=7 {
+            assert_eq!(grid_width(n), 3);
+        }
+        for n in 8..=19 {
+            assert_eq!(grid_width(n), 5);
+        }
+        for n in 20..=37 {
+            assert_eq!(grid_width(n), 7);
+        }
+        for n in 38..=61 {
+            assert_eq!(grid_width(n), 9);
+        }
+    }
+
+    /// Tests for [layers_n]
+    ///
+    #[test]
+    fn layers_n_test() {
+        assert_eq!(layers_n(0), 0);
+        assert_eq!(layers_n(1), 1);
+        for n in 2..=7 {
+            assert_eq!(layers_n(n), 2);
+        }
+        for n in 8..=19 {
+            assert_eq!(layers_n(n), 3);
+        }
+        for n in 20..=37 {
+            assert_eq!(layers_n(n), 4);
+        }
+        for n in 38..=61 {
+            assert_eq!(layers_n(n), 5);
+        }
+    }
+
+    /// Test for [construct_grid]: Error if input is empty
+    ///
+    #[test]
+    fn construct_grid_test_empty() {
+        assert!(construct_grid(&[]).is_err());
+    }
+
+    /// Test for [construct_grid]: Smallest possible grid
+    ///
+    #[test]
+    fn construct_grid_test_smallest() {
+        let expected: Grid = vec![vec!['A']];
+        assert_eq!(construct_grid(&['A']).unwrap(), expected);
+    }
+
+    /// Test for [construct_grid]: Construct a small grid (7 letters)
+    ///
+    #[test]
+    fn construct_grid_test_small() {
+        let expected: Grid = vec![
+            vec!['F', 'E', '\0'],
+            vec!['G', 'A', 'D'],
+            vec!['\0', 'B', 'C'],
+        ];
+        let letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+        assert_eq!(construct_grid(&letters).unwrap(), expected);
+    }
+
+    /// Test for [construct_grid]: Construct a medium grid (19 letters)
+    ///
+    #[test]
+    fn construct_grid_test_medium() {
+        let expected: Grid = vec![
+            vec!['Q', 'P', 'O', '\0', '\0'],
+            vec!['R', 'F', 'E', 'N', '\0'],
+            vec!['S', 'G', 'A', 'D', 'M'],
+            vec!['\0', 'H', 'B', 'C', 'L'],
+            vec!['\0', '\0', 'I', 'J', 'K'],
+        ];
+        let letters: Vec<char> = ('A'..='S').collect();
+        assert_eq!(construct_grid(&letters).unwrap(), expected);
     }
 }
